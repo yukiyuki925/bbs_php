@@ -1,7 +1,9 @@
 <?php
+session_start();
 $form = [
   'name'=> '',
   'email'=> '',
+  'password'=> '',
 ];
 $error = [];
 
@@ -25,10 +27,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $form['password'] = filter_input(INPUT_POST,'password',FILTER_DEFAULT);
   if ($form['password'] === ''){
     $error['password'] = 'blank';
-  } elseif (strlen($form['password']) < 4) {
+  } else if (strlen($form['password']) < 4) {
     $error['password'] = 'length';
   }
 
+  // 画像のチェック
+  $image = $_FILES['image'];
+  if ($image['name'] !== '' && $image['error'] === 0) {
+    $type = mime_content_type($image['tmp_name']);
+    if ($type !== 'image/png' && $type !== 'image/jpeg') {
+      $error['image'] = 'type';
+    }
+  }
+
+  if (empty($error)){
+    $_SESSION['form'] = $form;
+    header('Location: check.php');
+    exit();
+  };
 }
 ?>
 
@@ -70,8 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="error">* 指定されたメールアドレスはすでに登録されています</p>
           <dt>パスワード<span class="required">必須</span></dt>
           <dd>
-            <input type="password" name="password" size="10" maxlength="20"
-              value="<?php echo h($form['password']) ?>" />
+            <input type="password" name="password" size="10" maxlength="20" value="" />
             <?php if (isset($error['password']) && $error['password'] === 'blank'): ?>
             <p class="error">* パスワードを入力してください</p>
             <?php endif; ?>
@@ -82,7 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <dt>写真など</dt>
           <dd>
             <input type="file" name="image" size="35" value="" />
+            <?php if (isset($error['image']) && $error['image'] === 'type'): ?>
             <p class="error">* 写真などは「.png」または「.jpg」の画像を指定してください</p>
+            <?php endif; ?>
             <p class="error">* 恐れ入りますが、画像を改めて指定してください</p>
           </dd>
         </dl>
