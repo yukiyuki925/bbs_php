@@ -1,6 +1,16 @@
 <?php
 session_start();
-var_dump($_SESSION['form']);
+require('../library.php');
+
+// 確認画面に直接アクセスした場合は値が入っていない。
+// 直接アクセスされた場合、入力画面にジャンプする。
+if (isset($_SESSION['form'])) {
+  $form = $_SESSION['form'];
+} else {
+  header('Location: index.php');
+  exit();
+}
+$form = $_SESSION['form'];
 ?>
 
 <!DOCTYPE html>
@@ -26,16 +36,16 @@ var_dump($_SESSION['form']);
       <form action="" method="post">
         <dl>
           <dt>ニックネーム</dt>
-          <dd>○○</dd>
+          <dd><?php echo h($form['name']); ?></dd>
           <dt>メールアドレス</dt>
-          <dd>info@example.com</dd>
+          <dd><?php echo h($form['email']); ?></dd>
           <dt>パスワード</dt>
           <dd>
             【表示されません】
           </dd>
           <dt>写真など</dt>
           <dd>
-            <img src="../member_picture/" width="100" alt="" />
+            <img src="../member_picture/<?php echo h($form['image']); ?>" width="100" alt="" />
           </dd>
         </dl>
         <div><a href="index.php?action=rewrite">&laquo;&nbsp;書き直す</a> | <input type="submit" value="登録する" /></div>
