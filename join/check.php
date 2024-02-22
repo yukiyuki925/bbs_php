@@ -11,6 +11,24 @@ if (isset($_SESSION['form'])) {
   exit();
 }
 $form = $_SESSION['form'];
+
+// データベースに接続し、値を渡す
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $db = new mysqli('localhost', 'root', 'root', 'min_bbs');
+  if(!$db){
+    die($db->error);
+  };
+  $password = password_hash($form['password'],PASSWORD_DEFAULT);
+  $stmt = $db->prepare('insert into members(name, email, password, picture) VALUES (?, ?, ?, ?)');
+  $stmt->bind_param('ssss', $form['name'], $form['email'], $password, $form['image']);
+  $success = $stmt->execute();
+  if(!$success) {
+    die($db->error);
+  }
+
+  unset($_SESSION['form']);
+  header('Location: thanks.php');
+}
 ?>
 
 <!DOCTYPE html>
